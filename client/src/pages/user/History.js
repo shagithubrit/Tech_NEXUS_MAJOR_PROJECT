@@ -10,7 +10,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 
 const History = () => {
   const [orders, setOrders] = useState([]);
-  const { user } = useSelector((state) => state);
+ const { user } = useSelector((state) => ({ ...state }));
 
   const loadUserOrders = useCallback(
     () =>

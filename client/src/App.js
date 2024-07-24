@@ -82,16 +82,17 @@ const App = () => {
       if (user) {
         try {
           const idTokenResult = await user.getIdTokenResult();
-          // const res = await currentUser(idTokenResult.token);
+          //  we have used a create-update-user endpoint so that when the page get refreshed it will automatically logged in as a currently logged in user
+          const res = await currentUser(idTokenResult.token);
 
           dispatch({
             type: "LOGGED_IN_USER",
             payload: {
-              name: "Ryan",
+              name: res.data.name,
               email: user.email,
               token: idTokenResult.token,
-              // role: res.data.role,
-              // _id: res.data._id,
+              role: res.data.role,
+              _id: res.data._id,
             },
           });
         } catch (err) {

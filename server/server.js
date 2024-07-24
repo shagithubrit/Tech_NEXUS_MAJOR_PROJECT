@@ -10,9 +10,7 @@ require("dotenv").config();
 const app = express();
 
 //db
-const dbUrl =
-  process.env.DATABASE ||
-  "mongodb+srv://20218032gdscmnnit24:IIZfzBYPPZOIKX13@cluster0.d9gfan8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const dbUrl = process.env.DATABASE || "mongodb://localhost:27017/MernProj";
 mongoose
   .connect(dbUrl, {
     useNewUrlParser: true,
@@ -28,10 +26,7 @@ app.use(bodyParser.json({ limit: "2mb" }));
 app.use(cors());
 
 //routes middleware
-readdirSync('./routes').map((r) =>
-    app.use("/api", require('./routes/' + r))
-);
-
+readdirSync("./routes").map((r) => app.use("/api", require("./routes/" + r)));
 
 //port
 const port = process.env.PORT || 8000;

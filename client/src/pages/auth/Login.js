@@ -5,7 +5,7 @@ import { Button } from "antd";
 import { MailOutlined, GoogleOutlined } from "@ant-design/icons";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { createOrUpdateUser } from "../../functions/auth";
 
 const Login = ({ history }) => {
@@ -13,6 +13,8 @@ const Login = ({ history }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+
+  //  this is rolebased redirect function which defines to which page we should redirect the user...
 
   const roleBasedRedirect = (role) => {
     // check if intended
@@ -37,20 +39,27 @@ const Login = ({ history }) => {
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
 
-      const res = await createOrUpdateUser(idTokenResult.token);
+      createOrUpdateUser(idTokenResult.token)
+        .then((res) => {
+          console.log("CREATE OR UPDATE RES", res);
+          dispatch({
+            type: "LOGGED_IN_USER",
+            payload: {
+              name: res.data.name,
+              email: res.data.email,
+              token: idTokenResult.token,
+              role: res.data.role,
+              _id: res.data._id,
+            },
+          });
+          // now here we apply role base redirect whether user is admin or subscriber
+          roleBasedRedirect(res);
+        })
+        .catch((err) => console.log(err));
+      // history.push("/");
+      // setLoading(false);
 
-      dispatch({
-        type: "LOGGED_IN_USER",
-        payload: {
-          email: user.email,
-          token: idTokenResult.token,
-          role: res.data.role,
-          _id: res.data._id,
-        },
-      });
-      history.push("/");
-      setLoading(false);
-      roleBasedRedirect(res.data.role);
+      // roleBasedRedirect(res.data.role);
     } catch (err) {
       console.log("Login form error", err);
       toast.error(err.message);
@@ -59,29 +68,30 @@ const Login = ({ history }) => {
   };
 
   const handleGoogleLogin = async () => {
-    auth
-      .signInWithPopup(googleAuthProvider)
+    signInWithPopup(auth, googleAuthProvider)
       .then(async (result) => {
         const { user } = result;
         const idTokenResult = await user.getIdTokenResult();
+        createOrUpdateUser(idTokenResult.token)
+          .then((res) => {
+            dispatch({
+              type: "LOGGED_IN_USER",
+              payload: {
+                name: res.data.name,
+                email: res.data.email,
+                token: idTokenResult.token,
+                role: res.data.role,
+                _id: res.data._id,
+              },
+            });
+            roleBasedRedirect(res);
+          })
+          .catch((err) => console.log(err));
 
-        const res = await createOrUpdateUser(idTokenResult.token);
-
-        dispatch({
-          type: "LOGGED_IN_USER",
-          payload: {
-            name: res.data.name,
-            email: res.data.email,
-            token: idTokenResult.token,
-            role: res.data.role,
-            _id: res.data._id,
-          },
-        });
-
-        roleBasedRedirect(res.data.role);
+        // history.push('/');
       })
       .catch((err) => {
-        console.log("login error", err);
+        console.log(err);
         toast.error(err.message);
       });
   };

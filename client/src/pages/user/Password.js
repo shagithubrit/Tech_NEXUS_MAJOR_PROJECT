@@ -10,7 +10,7 @@ const Password = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    // here we update the password of the currently logged user 
     try {
       await auth.currentUser.updatePassword(password);
       toast.success("Password updated");

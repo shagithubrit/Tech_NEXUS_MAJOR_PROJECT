@@ -1,22 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { auth } from "../../firebase";
-import { signInWithEmailLink } from "firebase/auth";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-// import { useDispatch } from "react-redux";
-// import { createOrUpdateUser } from "../../functions/auth";
+import { auth } from "../../firebase";
+import {
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  updatePassword,
+} from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { createOrUpdateUser } from "../../functions/auth";
 
-const RegisterComplete = ({ history }) => {
+const RegisterComplete = (props) => {
+  //props history
+  const { history } = props;
+
+  // const {user}= useSelector((state) => ({...state}));
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const dispatch = useDispatch();
 
   useEffect(() => {
-    setEmail(localStorage.getItem("emailForRegistration"));
-  }, []);
+    setEmail(window.localStorage.getItem("emailForRegistration"));
+  }, [history]);
+
+  let dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // validation
     if (!email || !password) {
       toast.error("Email and password is required");
       return;
@@ -27,58 +36,66 @@ const RegisterComplete = ({ history }) => {
       return;
     }
 
-    try {
-       const result = await signInWithEmailLink(
-         auth,
-         email,
-         window.location.href
-       );
-       console.log("RESULT--->", result);
-      if (result.user.emailVerified) {
-        // remove email from localStorage
-        localStorage.removeItem("emailForRegistration");
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem("emailForRegistration");
+      if (!email) {
+        email = window.prompt("Please provide your email for confirmation");
+      }
+      signInWithEmailLink(auth, email, window.location.href)
+        .then(async (result) => {
+          //remove user email from local storage
+          window.localStorage.removeItem("emailForRegistration");
 
-      //   // get user id token
-        let user = auth.currentUser;
-        await user.updatePassword(password);
-        const idTokenResult = await user.getIdTokenResult();
-
-      //   // redux store
-      //   const res = await createOrUpdateUser(idTokenResult.token);
-
-        // dispatch({
-        //   type: "LOGGED_IN_USER",
-        //   payload: {
-        //     name: res.data.name,
-        //     email: res.data.email,
-        //     token: idTokenResult.token,
-        //     role: res.data.role,
-        //     _id: res.data._id,
-          // },
-        // });
-
-      history.push("/");
-    }
-  }
-    catch (err) {
-      console.log("Register complete error", err);
-      toast.error(err.message);
+          let user = auth.currentUser;
+          await updatePassword(user, password)
+            .then(() => {
+              console.log("password changed successfull");
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+          //get user id token
+          const idTokenResult = await user.getIdTokenResult();
+          //redux store
+          console.log(idTokenResult);
+          createOrUpdateUser(idTokenResult.token)
+            .then((res) => {
+              dispatch({
+                type: "LOGGED_IN_USER",
+                payload: {
+                  name: res.data.name,
+                  email: res.data.email,
+                  token: idTokenResult.token,
+                  role: res.data.role,
+                  _id: res.data._id,
+                },
+              });
+            })
+            .catch((err) => console.log(err));
+          //redirect
+          history.push("/");
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(error.message);
+        });
     }
   };
 
-  const completeRegistrationForm = () => (
+  const completeRegisterForm = () => (
     <form onSubmit={handleSubmit}>
       <input type="email" className="form-control" value={email} disabled />
       <input
         type="password"
-        className="form-control mt-2"
+        className="form-control"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
         autoFocus
-        placeholder="Enter your password"
       />
-      <button type="submit" className="btn btn-raised mt-2">
-        Complete Registration
+      <br />
+      <button type="submit" className="btn btn-primary">
+        Complete Register
       </button>
     </form>
   );
@@ -88,7 +105,7 @@ const RegisterComplete = ({ history }) => {
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <h4>Register Complete</h4>
-          {completeRegistrationForm()}
+          {completeRegisterForm()}
         </div>
       </div>
     </div>
