@@ -18,9 +18,17 @@ exports.authCheck = async (req, res, next) => {
   }
 };
 
-exports.currentUser = async (req, res) => {
-  User.findOne({ email: req.user.email }).exec((err, user) => {
-    if (err) throw new Error(err);
-    res.json(user);
-  });
+// this middleware is uded to check whether the user is admin or not ---> kind of a second layer of security for admin data
+
+exports.adminCheck = async (req, res, next) => {
+  const { email } = req.user;
+  const adminUser = await User.findOne({ email }).exec();
+
+  if (adminUser.role !== "admin") {
+    res.status(403).json({
+      err: "Admin resource. Access denied",
+    });
+  } else {
+    next();
+  }
 };
