@@ -1,19 +1,24 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { useSelector } from "react-redux";
+
 
 import { auth } from "../../firebase";
 import { toast } from "react-toastify";
 
-const ForgotPassword = () => {
+const ForgotPassword = ({history}) => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+
+      const { user } = useSelector((state) => ({ ...state }));
+
   //   redirect user to home page if they are logged in. See App.js for alternative way
-  // useEffect(() => {
-  //   if (user && user.token) {
-  //     history.push("/");
-  //   }
-  // }, [history, user]);
+  useEffect(() => {
+    if (user && user.token) {
+      history.push("/");
+    }
+  }, [history, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
