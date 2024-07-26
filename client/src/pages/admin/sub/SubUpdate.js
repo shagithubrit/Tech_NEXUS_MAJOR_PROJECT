@@ -79,6 +79,7 @@ const CategoryCreate = ({ match, history }) => {
               name="category"
               className="form-control mb-2"
               onChange={(e) => setParent(e.target.value)}
+              value={parent}
             >
               <option>Please select</option>
               {categories.length > 0 &&

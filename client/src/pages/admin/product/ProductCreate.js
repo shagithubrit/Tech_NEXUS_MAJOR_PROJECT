@@ -48,6 +48,7 @@ const ProductCreate = () => {
   const [subOptions, setSubOptions] = useState([]);
   const [showSub, setShowSub] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { user } = useSelector((state) => ({ ...state }));
 
   let isMounted = useRef(true);
   const loadCategories = useCallback(async () => {
@@ -67,18 +68,21 @@ const ProductCreate = () => {
     };
   }, [loadCategories]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await createProduct(values, authtoken);
-      setValues(initialState);
-      window.location.reload();
-    } catch (err) {
-      console.log(err.response);
-      toast.error(err.response.data.err);
-    }
+    createProduct(values, user.token)
+      .then((res) => {
+        console.log(res);
+        window.alert(`${res.data.title} is created`);
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.log(err);
+        // if (err.response.status === 400)
+        //     toast.error(err.response.data);
+        toast.error(err.response.data.err);
+      });
   };
-
   const handleChange = (e) => {
     setValues({
       ...values,
