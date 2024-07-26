@@ -163,9 +163,9 @@ const ProductCreate = () => {
                 >
                   <Avatar
                     src={img.url}
-                    size={120}
+                    size={60}
                     className="m-2"
-                    shape="square"
+                    shape="round"
                   />
                 </Badge>
               ))}
