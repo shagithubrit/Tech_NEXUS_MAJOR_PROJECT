@@ -49,7 +49,7 @@ const ProductCreate = ({ match, history }) => {
             setSubOptions(res.data);
           });
 
-          // for the array of subs in product update
+          // for the array of subs in product update  for the particular category id 
           let arr = [];
           product.data.subs.forEach((sub) => arr.push(sub._id));
           setArrayOfSubIds((prev) => arr);

@@ -13,6 +13,8 @@ const ProductCardInCheckout = ({ product }) => {
   const dispatch = useDispatch();
 
   const updateCartInStorage = (cart) => {
+
+
     localStorage.setItem("cart", JSON.stringify(cart));
     dispatch({ type: "ADD_TO_CART", payload: cart });
   };
@@ -20,8 +22,9 @@ const ProductCardInCheckout = ({ product }) => {
   const handleColorChange = (e) => {
     let cart = [];
     if (typeof window !== "undefined") {
+      // to check whether we are in the windows envioronment or not ...
       if (localStorage.getItem("cart")) {
-        cart = JSON.parse(localStorage.getItem("cart"));
+        cart = JSON.parse(localStorage.getItem("cart")); // it parses it into object string 
       }
 
       cart.map((prod, i) => {
@@ -29,11 +32,12 @@ const ProductCardInCheckout = ({ product }) => {
           cart[i].color = e.target.value;
         }
       });
-
+      //  after saving it in local storage it will now update the redux store with new cart 
       updateCartInStorage(cart);
     }
   };
 
+  // just like color you can same do for quantitiy 
   const handleQuantityChange = (e) => {
     let count = e.target.value < 1 ? 1 : e.target.value;
 

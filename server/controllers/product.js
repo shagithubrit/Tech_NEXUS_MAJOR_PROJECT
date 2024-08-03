@@ -91,6 +91,7 @@ exports.list = async (req, res) => {
     const perPage = 4;
 
     const products = await Product.find({})
+    //skip that much amount of cards ... so lets suppose if user 
       .skip((currentPage - 1) * perPage)
       .populate("category")
       .populate("subs")
@@ -109,11 +110,14 @@ exports.productsCount = async (req, res) => {
 };
 
 exports.productStar = async (req, res) => {
+
+  // first we need to find the product --->
   const product = await Product.findById(req.params.productId).exec();
+  // then we need to find the user 
   const user = await User.findOne({ email: req.user.email }).exec();
   const { star } = req.body;
   //who is updating
-  //check if logged in user have already added rating to this product
+  //check if currently logged in user have already added rating to this product
   let existingRatingObject = product.ratings.find(
     (ele) => ele.postedBy.toString() === user._id.toString()
   );
@@ -203,7 +207,8 @@ const handlePrice = async (req, res, price) => {
 };
 
 const handleCategory = async (req, res, category) => {
-  console.log(category);
+  // console.log(category);  -->  just for checking purpose 
+
   try {
     let products = await Product.find({ category })
       .populate("category", "_id name")
@@ -214,7 +219,7 @@ const handleCategory = async (req, res, category) => {
           path: "postedBy",
           model: "User",
         },
-      })
+      }) 
       .exec();
 
     res.json(products);
@@ -227,8 +232,8 @@ const handleStar = async (req, res, stars) => {
   Product.aggregate([
     {
       $project: {
-        // title: '$title',
-        // description: '$description',
+        title: '$title',
+        description: '$description',
         document: "$$ROOT",
         floorAverage: {
           $floor: { $avg: "$ratings.star" },
@@ -324,7 +329,7 @@ const handleBrand = async (req, res, brand) => {
 exports.searchFilters = async (req, res) => {
   const { query, price, category, stars, sub, shipping, color, brand } =
     req.body;
-
+  
   if (query) {
     console.log("query ", query);
     await handleQuery(req, res, query);

@@ -32,6 +32,6 @@ router.put("/product/star/:productId", authCheck, productStar);
 //related
 router.get("/product/related/:productId", listRelated);
 //search
-router.post("/search/filter", searchFilters);
+router.post("/search/filters", searchFilters);
 
 module.exports = router;

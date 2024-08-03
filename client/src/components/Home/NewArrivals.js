@@ -7,6 +7,8 @@ import { Pagination } from "antd";
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // state to get the total number of products count 
   const [productsCount, setProductsCount] = useState(0);
   const [page, setPage] = useState(1);
 

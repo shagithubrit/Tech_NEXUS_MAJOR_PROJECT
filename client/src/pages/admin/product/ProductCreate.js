@@ -112,7 +112,7 @@ const ProductCreate = () => {
     setLoading(true);
     try {
       await axios.post(
-        `${process.env.REACT_APP_API}/removeimage`,
+        `${process.env.REACT_APP_API}/removeimages`,
         { public_id: imageId },
         {
           headers: {

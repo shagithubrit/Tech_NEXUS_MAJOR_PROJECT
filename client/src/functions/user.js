@@ -17,11 +17,15 @@ export const emptyUserCart = async (authToken) =>
     headers: { authToken },
   });
 
-export const saveUserAddress = async (address, authToken) =>
+export const saveUserAddress = async (authtoken, address) =>
   await axios.post(
     `${process.env.REACT_APP_API}/user/address`,
     { address },
-    { headers: { authToken } }
+    {
+      headers: {
+        authtoken,
+      },
+    }
   );
 
 export const applyCoupon = async (coupon, authToken) =>

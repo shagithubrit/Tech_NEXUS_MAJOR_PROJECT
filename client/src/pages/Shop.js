@@ -34,6 +34,8 @@ const Shop = () => {
   const { search } = useSelector((state) => state);
   const { text } = search;
 
+
+
   // reset all values
   const resetAllFilters = () => {
     dispatch({
@@ -75,11 +77,14 @@ const Shop = () => {
       fetchProducts({ query: text });
     }, 300);
 
+    //  we want this slight delay beacuse we don't want much api request
+
     return () => clearTimeout(delayed);
   }, [text]);
 
   // 3. load products based on price range
   const handleSlider = (value) => {
+    //we ca also dispatch empty text of query in the redux store so as to get the new filter states
     resetAllFilters();
     setPrice(value);
     setTimeout(() => {
@@ -98,6 +103,7 @@ const Shop = () => {
       <div key={cat._id}>
         <Checkbox
           className="pb-2 pl-4 pr-4"
+          // this needs to be done so as to get only checked categories it(cat._id) should contain under the categoryIds array
           checked={categoryIds.includes(cat._id)}
           value={cat._id}
           name="category"
@@ -110,14 +116,32 @@ const Shop = () => {
     ));
 
   // handle check for categories
+  //  as the user click the check boxes on the above function it will  keep on pushing the id on the in inTheState state without any duplicates
   function handleCheck(e) {
+    // here's the explaination  of 1st three lines of the  function
+    //let inTheState = [...categoryIds];
+
+    // This creates a new array that is a copy of the current categoryIds state.
+    // Using the spread operator (...) ensures we're working with a new array instead of modifying the original state directly, which is a best practice in React.
+
+    // let justChecked = e.target.value;
+
+    // This captures the value of the checkbox that was just clicked.
+    // e.target.value contains the ID of the category associated with the checkbox.
+
+    // let foundInTheState = inTheState.indexOf(justChecked);
+
+    // This checks if the category ID of the checkbox that was just clicked is already in the inTheState array.
+    // indexOf returns the index of the element if it's found, or -1 if it's not in the array.
     let inTheState = [...categoryIds];
     let justChecked = e.target.value;
     let foundInTheState = inTheState.indexOf(justChecked);
 
+    // if ===-1 it means that it is not present
     if (foundInTheState === -1) {
       inTheState.push(justChecked);
     } else {
+      // it means it is clicked twice so we need to remove that category from the array
       inTheState.splice(foundInTheState, 1);
     }
     resetAllFilters();

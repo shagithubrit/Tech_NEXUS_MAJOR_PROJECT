@@ -10,6 +10,7 @@ const Search = () => {
 
   const history = useHistory();
 
+  //  after user changed  the search and typed something on that we want to push that detail from search bar to the redux store 
   const handleChange = (e) => {
     dispatch({
       type: "SEARCH_QUERY",
@@ -17,11 +18,15 @@ const Search = () => {
     });
   };
 
+  // when the user clicked the search bar then it will automaticall push them to 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     history.push(`/shop?${text}`);
   };
 
+
+    //  in this we are showing the search form 
   return (
     <form
       className="form-inline my-2 my-lg-0"

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Tooltip } from "antd";
+import { Card, Tooltip,Skeleton } from "antd";
 import { EyeOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import laptop from "../../images/laptop.png";
 import { Link } from "react-router-dom";

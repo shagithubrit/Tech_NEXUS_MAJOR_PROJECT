@@ -34,9 +34,14 @@ export const getProducts = async (sort, order, page) =>
     page,
   });
 
+
+  // this is added for the home page to give the total number of products available in th ecommerce through pagination 
 export const getProductsCount = async () =>
   await axios.get(`${process.env.REACT_APP_API}/products/total`);
 
+
+// to store the star rating of the particular user 
+// 
 export const productStar = async (productId, star, authtoken) =>
   await axios.put(
     `${process.env.REACT_APP_API}/product/star/${productId}`,

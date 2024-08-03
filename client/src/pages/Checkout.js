@@ -28,8 +28,8 @@ const Checkout = ({ history }) => {
     let isMounted = true;
     if (isMounted) {
       getUserCart(user.token).then((res) => {
-        setProducts(res.data.data.products);
-        setTotal(res.data.data.cartTotal);
+        setProducts(res.data.products);
+        setTotal(res.data.cartTotal);
       });
     }
     return () => {
@@ -57,15 +57,15 @@ const Checkout = ({ history }) => {
     });
   };
 
-  const saveAddressToDB = () => {
-    saveUserAddress(address, user.token).then((res) => {
-      if (res.data.status === "success") {
-        setAddressSaved(true);
-        toast.success("Address saved successfully");
-      }
-    });
-  };
-
+    const saveAddressToDB = () => {
+      // console.log(address);
+      saveUserAddress(user.token, address).then((res) => {
+        if (res.data.ok) {
+          setAddressSaved(true);
+          toast.success("Address saved");
+        }
+      });
+    };
   const applyDiscountCoupon = () => {
     applyCoupon(coupon, user.token).then((res) => {
       if (res.data.error) {
