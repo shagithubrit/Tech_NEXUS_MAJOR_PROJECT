@@ -5,10 +5,20 @@ export const getCoupons = async () =>
 
 export const removeCoupon = async (couponId, authToken) =>
   await axios.delete(`${process.env.REACT_APP_API}/coupon/${couponId}`, {
-    headers: { authToken },
+    headers: {
+      authToken,
+    },
   });
 
 export const createCoupon = async (coupon, authToken) =>
-  await axios.post(`${process.env.REACT_APP_API}/coupon`, coupon, {
-    headers: { authToken },
-  });
+  await axios.post(
+    `${process.env.REACT_APP_API}/coupon`,
+    {
+      coupon,
+    },
+    {
+      headers: {
+        authToken,
+      },
+    }
+  );

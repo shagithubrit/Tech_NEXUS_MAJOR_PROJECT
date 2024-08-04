@@ -1,61 +1,65 @@
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import AdminNav from "../../../components/nav/AdminNav";
-import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   getCoupons,
   removeCoupon,
   createCoupon,
 } from "../../../functions/coupon";
 import { DeleteOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
+import AdminNav from "../../../components/nav/AdminNav";
 
 const CreateCoupon = () => {
   const [name, setName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [discount, setDiscount] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState("");
   const [coupons, setCoupons] = useState([]);
-  const { user } = useSelector((state) => state);
 
-  const loadAllCoupons = () => {
-    getCoupons().then((res) => setCoupons(res.data.data));
-  };
+  const { user } = useSelector((state) => ({ ...state }));
+
   useEffect(() => {
     loadAllCoupons();
   }, []);
+
+  const loadAllCoupons = () => {
+    getCoupons().then((res) => {
+      setCoupons(res.data);
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     createCoupon({ name, expiry, discount }, user.token)
       .then((res) => {
-        if (res.data.error) {
-          toast.error(res.data.error);
-          setLoading(false);
-        } else {
-          loadAllCoupons();
-          setLoading(false);
-          setName("");
-          setExpiry("");
-          setDiscount("");
-          toast.success(`'${res.data.data.name}' is created`);
-        }
+        setLoading(false);
+        loadAllCoupons();
+        setName("");
+        setDiscount("");
+        setExpiry();
+        toast.success(`${res.data.name} is created`);
       })
-      .catch((err) => console.error("Create coupon error: ", err));
+      .catch((err) => {
+        console.log("coupon creation error: ", err);
+        toast.error(`Something went wrong`);
+      });
   };
 
   const handleRemove = (couponId) => {
-    if (window.confirm("Are you sure you want to delete this coupon ?")) {
+    if (window.confirm("Delete ?")) {
       setLoading(true);
       removeCoupon(couponId, user.token)
         .then((res) => {
           loadAllCoupons();
           setLoading(false);
-          toast.success(`Coupon has been deleted successfuly`);
+          toast.error(`Coupon "${res.data.name}" deleted`);
         })
-        .catch((err) => console.log("Deleting coupon error: ", err));
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 
@@ -65,71 +69,71 @@ const CreateCoupon = () => {
         <div className="col-md-2">
           <AdminNav />
         </div>
-        <div className="col-md-10">
-          <h4>Coupon</h4>
-
-          <form action="" onSubmit={handleSubmit}>
+        <div className="col-md-6">
+          {loading ? <h4>Loading...</h4> : <h4>Coupon</h4>}
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="text-muted">Name</label>
+              <label className="text-muted mb-2">Name</label>
               <input
-                className="form-control"
                 type="text"
+                className="form-control"
                 onChange={(e) => setName(e.target.value)}
                 value={name}
                 autoFocus
                 required
-              ></input>
+              />
             </div>
-            <div className="form-group">
-              <label className="text-muted">Discount %</label>
+            <div className="form-group mt-3">
+              <label className="text-muted mb-2">Discount %</label>
               <input
-                className="form-control"
                 type="text"
+                className="form-control"
                 onChange={(e) => setDiscount(e.target.value)}
                 value={discount}
                 required
-              ></input>
+              />
             </div>
-            <div className="form-group">
-              <label className="text-muted">Expiry</label>
+            <div className="form-group mt-3">
+              <label className="text-muted mb-2">Expiry</label>
+              <br />
               <DatePicker
                 className="form-control"
-                selected={expiry}
+                selected={new Date()}
+                value={expiry}
+                onChange={(date) => setExpiry(date.toLocaleDateString())}
                 required
-                onChange={(date) => setExpiry(date)}
               />
-              <button className="btn btn-outlined-primary mt-2">Save</button>
             </div>
+            <button className="btn btn-outline-primary mt-3">Save</button>
           </form>
-
           <br />
 
-          <h4>{loading ? "Loading ..." : ""}</h4>
-
           <table className="table table-bordered">
-            <thead className="table-light">
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Expiry</th>
-                <th scope="col">Discount</th>
-                <th scope="col">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coupons.map((coupon) => (
-                <tr key={coupon._id}>
-                  <td>{coupon.name}</td>
-                  <td>{new Date(coupon.expiry).toLocaleDateString("en-GB")}</td>
-                  <td className="text-center">{coupon.discount}%</td>
-                  <td className="text-center">
-                    <DeleteOutlined
-                      className="text-danger pointer"
-                      onClick={() => handleRemove(coupon._id)}
-                    />
-                  </td>
+            <table className="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Expiry</th>
+                  <th scope="col">Discount</th>
+                  <th scope="col">Action</th>
                 </tr>
-              ))}
-            </tbody>
+              </thead>
+              <tbody>
+                {coupons.map((c) => (
+                  <tr key={c._id}>
+                    <td>{c.name}</td>
+                    <td>{new Date(c.expiry).toLocaleDateString()}</td>
+                    <td>{c.discount} %</td>
+                    <td>
+                      <DeleteOutlined
+                        className="text-danger pointer"
+                        onClick={() => handleRemove(c._id)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </table>
         </div>
       </div>
