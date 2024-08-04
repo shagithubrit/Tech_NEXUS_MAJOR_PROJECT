@@ -1,23 +1,21 @@
+import React, { useState, useEffect } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createPaymentIntent } from "../functions/stripe";
 import { Link } from "react-router-dom";
-import { createOrder, emptyUserCart } from "../functions/user";
-
 import { Card } from "antd";
 import { DollarOutlined, CheckOutlined } from "@ant-design/icons";
-import Laptop from "../images/laptop.png";
+import { createOrder, emptyUserCart } from "../functions/user";
 
 const StripeCheckout = ({ history }) => {
   const dispatch = useDispatch();
-  const { user, coupon } = useSelector((state) => state);
+  const { user, coupon } = useSelector((state) => ({ ...state }));
 
   const [succeeded, setSucceeded] = useState(false);
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState("");
   const [disabled, setDisabled] = useState(true);
-  const [clientSecret, setClientSecret] = useState("");
+  const [clientSecret, setclientSecret] = useState(false);
 
   const [cartTotal, setCartTotal] = useState(0);
   const [totalAfterDiscount, setTotalAfterDiscount] = useState(0);
@@ -27,13 +25,20 @@ const StripeCheckout = ({ history }) => {
   const elements = useElements();
 
   useEffect(() => {
-    createPaymentIntent(coupon, user.token).then((res) => {
-      setClientSecret(res.data.clientSecret);
+    createPaymentIntent(user.token, coupon).then((res) => {
+      console.log(res.data);
+      // console.log("create payment intent", res.data);
+      setclientSecret(res.data.clientSecret);
+      //additional response received on successful payment
+
       setCartTotal(res.data.cartTotal);
       setTotalAfterDiscount(res.data.totalAfterDiscount);
+      // console.log("payment after discount ", totalAfterDiscount);
       setPayable(res.data.payable);
     });
-  }, [user.token, coupon]);
+  }, []);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,20 +57,27 @@ const StripeCheckout = ({ history }) => {
       setError(`Payment failed ${payload.error.message}`);
       setProcessing(false);
     } else {
-      // here you get result after successful payment
-      // create order and save in db for admin to process
+      //create order and save in database for admin to process
       createOrder(payload, user.token).then((res) => {
-        if (res.data.status === "success") {
-          // empty user cart from redux store and local storage
+        if (res.data.ok) {
+          //empty cart from local storage
           if (typeof window !== "undefined") localStorage.removeItem("cart");
-          dispatch({ type: "ADD_TO_CART", payload: [] });
+          //empty cart from redux
+          dispatch({
+            type: "ADD_TO_CART",
+            payload: [],
+          });
+          //reset coupon to false
           dispatch({
             type: "COUPON_APPLIED",
             payload: false,
           });
+          //empty cart from database
           emptyUserCart(user.token);
         }
       });
+      //empty user cart from redux and local storage
+      console.log(JSON.stringify(payload, null, 4));
       setError(null);
       setProcessing(false);
       setSucceeded(true);
@@ -73,9 +85,9 @@ const StripeCheckout = ({ history }) => {
   };
 
   const handleChange = async (e) => {
-    // listen for chacnges in the card element and display any error
-    // as the customer types their details
-    setDisabled(e.empty); // disable pay button if error
+    //listen for changes in card element
+    //and display any error as the customer  types theiir card details
+    setDisabled(e.empty);
     setError(e.error ? e.error.message : "");
   };
 
@@ -102,40 +114,26 @@ const StripeCheckout = ({ history }) => {
       {!succeeded && (
         <div>
           {coupon && totalAfterDiscount !== undefined ? (
-            <p className="alert alert-success">{`Total after discount $${totalAfterDiscount}`}</p>
+            <p className="alert alert-success">{`Total after discount: ₹ ${totalAfterDiscount}`}</p>
           ) : (
-            <p className="alert alert-danger">No coupon applied</p>
+            <p className="aler alert-danger">No coupon applied</p>
           )}
         </div>
       )}
-      <div className="text-center pb-5">
+      <div className="text-center py-3">
         <Card
-          cover={
-            <img
-              src={Laptop}
-              style={{
-                height: "300px",
-                objectFit: "cover",
-                marginBottom: "-50px",
-              }}
-              alt="laptop"
-            />
-          }
           actions={[
             <>
               <DollarOutlined className="text-info" />
-              <br />
-              Total: ${cartTotal}
+              <br /> Total: ₹ {cartTotal}
             </>,
             <>
-              <CheckOutlined className="text-info" />
-              <br />
-              Total payable: ${(payable / 100).toFixed(2)}
+              <CheckOutlined className="text-info" /> <br /> Total Payable: ₹{" "}
+              {payable.toFixed(2)}
             </>,
           ]}
         />
       </div>
-
       <form id="payment-form" className="stripe-form" onSubmit={handleSubmit}>
         <CardElement
           id="card-element"
@@ -159,7 +157,7 @@ const StripeCheckout = ({ history }) => {
         <br />
         <p className={succeeded ? "result-message" : "result-message hidden"}>
           Payment successful.{" "}
-          <Link to="/user/history">See it in your purchase history.</Link>
+          <Link to="/user/history">See it in your purchase history</Link>
         </p>
       </form>
     </>
