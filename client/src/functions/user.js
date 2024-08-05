@@ -61,7 +61,7 @@ export const removeWishlist = async (productId, authToken) =>
     }
   );
 
-export const addToWishlist = async (authToken, productId) =>
+export const addToWishlist = async (productId, authToken) =>
   await axios.post(
     `${process.env.REACT_APP_API}/user/wishlist`,
     { productId },

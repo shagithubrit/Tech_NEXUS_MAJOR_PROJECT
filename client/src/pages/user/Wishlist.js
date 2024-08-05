@@ -1,32 +1,29 @@
 import React, { useState, useEffect } from "react";
 import UserNav from "../../components/nav/UserNav";
 import { getWishlist, removeWishlist } from "../../functions/user";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { useCallback } from "react";
 import { DeleteOutlined } from "@ant-design/icons";
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
-  const { user } = useSelector((state) => state);
-
-  const loadWishlist = useCallback(
-    () =>
-      getWishlist(user.token).then((res) => {
-        setWishlist(res.data.data.wishlist);
-        console.log(res.data.data.wishlist);
-      }),
-    [user.token]
-  );
+  const { user } = useSelector((state) => ({ ...state }));
 
   useEffect(() => {
     loadWishlist();
-  }, [loadWishlist]);
+  }, []);
 
-  const handleRemove = (productId) =>
+  const loadWishlist = () => {
+    getWishlist(user.token).then((res) => {
+      setWishlist(res.data.wishlist);
+    });
+  };
+
+  const handleRemove = (productId) => {
     removeWishlist(productId, user.token).then((res) => {
       loadWishlist();
     });
+  };
 
   return (
     <div className="container-fluid">
@@ -36,12 +33,12 @@ const Wishlist = () => {
         </div>
         <div className="col">
           <h4>Wishlist</h4>
-          {wishlist.map((product) => (
-            <div key={product._id} className="alert alert-secondary">
-              <Link to={`/product/${product.slug}`}>{product.title}</Link>
+          {wishlist.map((p) => (
+            <div key={p._id} className="alert alert-secondary">
+              <Link to={`/product/${p.slug}`}>{p.title}</Link>
               <span
-                className="btn btn-sm float-end"
-                onClick={() => handleRemove(product._id)}
+                onClick={() => handleRemove(p._id)}
+                className="btn btn-sm float-right"
               >
                 <DeleteOutlined className="text-danger" />
               </span>
