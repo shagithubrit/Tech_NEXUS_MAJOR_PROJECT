@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
 import UserNav from "../../components/nav/UserNav";
 import { getUserOrders } from "../../functions/user";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { useCallback } from "react";
+import { toast } from "react-toastify";
 import ShowPaymentInfo from "../../components/cards/ShowPaymentInfo";
+
+import { PDFDownloadLink,PDFViewer,StyleSheet,Text,Page,Document,View } from "@react-pdf/renderer";
 import Invoice from "../../components/order/Invoice";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 
 const History = () => {
   const [orders, setOrders] = useState([]);
- const { user } = useSelector((state) => ({ ...state }));
-
-  const loadUserOrders = useCallback(
-    () =>
-      getUserOrders(user.token).then((res) => {
-        setOrders(res.data.data);
-      }),
-    [user.token]
-  );
+  const { user } = useSelector((state) => ({ ...state }));
 
   useEffect(() => {
     loadUserOrders();
-  }, [loadUserOrders]);
+  }, []);
+
+  const loadUserOrders = () => {
+    getUserOrders(user.token).then((res) => {
+      console.log("from here========", JSON.stringify(res.data, null, 4));
+      setOrders(res.data);
+    });
+  };
 
   const showOrderInTable = (order) => (
-    <table className="table table-bordered">
-      <thead className="table-light">
+    <table className="table">
+      <thead>
         <tr>
           <th scope="col">Title</th>
           <th scope="col">Price</th>
@@ -42,15 +42,15 @@ const History = () => {
             <td>
               <b>{p.product.title}</b>
             </td>
-            <td>${p.product.price}</td>
+            <td>{p.product.price}</td>
             <td>{p.product.brand}</td>
-            <td>{p.product.color}</td>
+            <td>{p.color}</td>
             <td>{p.count}</td>
             <td>
               {p.product.shipping === "Yes" ? (
-                <CheckCircleOutlined style={{ color: "green" }} />
+                <CheckCircleOutlined className="text-success" />
               ) : (
-                <CloseCircleOutlined style={{ color: "red" }} />
+                <CloseCircleOutlined className="text-danger" />
               )}
             </td>
           </tr>
@@ -62,20 +62,23 @@ const History = () => {
   const showDownloadLink = (order) => (
     <PDFDownloadLink
       document={<Invoice order={order} />}
-      className="btn btn-sm btn-block btn-outline-primary"
       fileName="invoice.pdf"
+      className="btn btn-primary"
     >
       Download PDF
     </PDFDownloadLink>
   );
 
-  const showEachOrder = () =>
+
+
+
+  const showEachOrders = () =>
     orders.reverse().map((order, i) => (
-      <div key={i} className="m-5 p-3 card">
+      <div key={i} className="my-5 py-3 card">
         <ShowPaymentInfo order={order} />
         {showOrderInTable(order)}
         <div className="row">
-          <div className="col">{showDownloadLink(order)}</div>
+          <div className="col text-center">{showDownloadLink(order)}</div>
         </div>
       </div>
     ));
@@ -86,11 +89,11 @@ const History = () => {
         <div className="col-md-2">
           <UserNav />
         </div>
-        <div className="col text-center pt-3">
+        <div className="col-md-10">
           <h4>
             {orders.length > 0 ? "User purchase orders" : "No purchase orders"}
           </h4>
-          {showEachOrder()}
+          {showEachOrders()}
         </div>
       </div>
     </div>
