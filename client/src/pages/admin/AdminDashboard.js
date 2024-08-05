@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from "react";
 import AdminNav from "../../components/nav/AdminNav";
 import { getOrders, changeStatus } from "../../functions/admin";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { useCallback } from "react";
 import Orders from "../../components/order/Orders";
 
 const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
-  const { user } = useSelector((state) => state);
-
-  const loadOrders = useCallback(
-    () =>
-      getOrders(user.token).then((res) => {
-        setOrders(res.data.data);
-      }),
-    [user.token]
-  );
+  const { user } = useSelector((state) => ({ ...state }));
 
   useEffect(() => {
     loadOrders();
-  }, [loadOrders]);
+  }, []);
+
+  const loadOrders = () => {
+    getOrders(user.token).then((res) => {
+      console.log(JSON.stringify(res.data, null, 4));
+      setOrders(res.data);
+    });
+  };
 
   const handleStatusChange = (orderId, orderStatus) => {
     changeStatus(orderId, orderStatus, user.token).then((res) => {
@@ -35,9 +33,8 @@ const AdminDashboard = () => {
         <div className="col-md-2">
           <AdminNav />
         </div>
-
-        <div className="col mt-3">
-          <h4>Admin Dashboard</h4>
+        <div className="col-md-10">
+          <h4>Dashboard</h4>
           <Orders orders={orders} handleStatusChange={handleStatusChange} />
         </div>
       </div>
