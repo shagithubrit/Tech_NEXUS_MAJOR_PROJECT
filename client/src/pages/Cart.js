@@ -23,27 +23,30 @@ const Cart = ({ history }) => {
   //     .catch((err) => console.log("cart save to DB error: ", err));
   // };
 
-      const saveOrderToDB = () => {
-        userCart(cart, user.token)
-          .then((res) => {
-            console.log("CART POST RES", res);
-            if (res.data.ok) history.push("/checkout");
-          })
-          .catch((err) => {
-            console.log("cart save err", err);
-          });
-      };
-
-
-  const saveCashOrderToDB = () => {
-    // save item in backend
-    dispatch({ type: "COD", payload: true });
+  const saveOrderToDB = () => {
     userCart(cart, user.token)
       .then((res) => {
-        // redirect user to checkout page
-        if (res.data.status === "success") history.push("/checkout");
+        console.log("CART POST RES", res);
+        if (res.data.ok) history.push("/checkout");
       })
-      .catch((err) => console.log("cart save to DB error: ", err));
+      .catch((err) => {
+        console.log("cart save err", err);
+      });
+  };
+
+  const saveCashOrderToDB = () => {
+    dispatch({
+      type: "COD",
+      payload: true,
+    });
+    userCart(cart, user.token)
+      .then((res) => {
+        console.log("CART POST RES", res);
+        if (res.data.ok) history.push("/checkout");
+      })
+      .catch((err) => {
+        console.log("cart save err", err);
+      });
   };
 
   const showCartItems = () => {

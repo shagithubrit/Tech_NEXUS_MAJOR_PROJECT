@@ -36,10 +36,11 @@ router.get("/user/orders", authCheck, orders);
 
 
 // wishlist 
-
 router.post("/user/wishlist", authCheck, addToWishlist);
 router.get("/user/wishlist", authCheck, wishlist);
 router.put("/user/wishlist/:productId", authCheck, removeFromWishlist);
+
+
 
 
 // router.post("/create-or-update-user", authCheck, createOrUpdateUser);
