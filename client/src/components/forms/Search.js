@@ -10,7 +10,6 @@ const Search = () => {
 
   const history = useHistory();
 
-  //  after user changed  the search and typed something on that we want to push that detail from search bar to the redux store 
   const handleChange = (e) => {
     dispatch({
       type: "SEARCH_QUERY",
@@ -18,15 +17,11 @@ const Search = () => {
     });
   };
 
-  // when the user clicked the search bar then it will automaticall push them to 
-
   const handleSubmit = (e) => {
     e.preventDefault();
     history.push(`/shop?${text}`);
   };
 
-
-    //  in this we are showing the search form 
   return (
     <form
       className="form-inline my-2 my-lg-0"
@@ -43,8 +38,31 @@ const Search = () => {
         value={text}
         className="form-control mr-sm-2"
         placeholder="Search"
+        style={{
+          // Increased height to make the search bar thicker
+          height: "2.5rem",
+          // Adjusted font size for better readability
+          fontSize: "1rem",
+          // Added padding for better text alignment within the input
+          padding: "0.375rem 0.75rem",
+          // Added border radius for a softer look
+          borderRadius: "0.25rem",
+          // Added a subtle border
+          border: "1px solid #ced4da",
+          // Made the width responsive: min 150px, max 300px, 30% of viewport width between these
+          width: "clamp(150px, 30vw, 300px)",
+        }}
       />
-      <SearchOutlined onClick={handleSubmit} style={{ cursor: "pointer" }} />
+      <SearchOutlined
+        onClick={handleSubmit}
+        style={{
+          cursor: "pointer",
+          // Increased icon size to match the thicker search bar
+          fontSize: "1.5rem",
+          // Added padding to make the icon easier to click
+          padding: "0.375rem",
+        }}
+      />
     </form>
   );
 };

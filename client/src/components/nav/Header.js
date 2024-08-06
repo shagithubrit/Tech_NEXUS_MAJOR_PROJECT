@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { Menu, Badge } from "antd";
 import {
   AppstoreOutlined,
+  ShoppingCartOutlined,
+  ShoppingOutlined,
   SettingOutlined,
+  LogoutOutlined,
   UserOutlined,
   UserAddOutlined,
-  LogoutOutlined,
-  ShoppingOutlined,
-  ShoppingCartOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import firebase from "firebase/compat/app";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import Search from "../forms/Search";
@@ -19,78 +20,80 @@ const { SubMenu, Item } = Menu;
 
 const Header = () => {
   const [current, setCurrent] = useState("home");
-  const dispatch = useDispatch();
-  const { user, cart } = useSelector((state) => state);
-  const history = useHistory();
+  let dispatch = useDispatch();
+  let { user, cart } = useSelector((state) => ({ ...state }));
+  let history = useHistory();
 
   const handleClick = (e) => {
     setCurrent(e.key);
   };
 
   const logout = () => {
-    firebase.auth().signOut();
-    dispatch({
-      type: "LOGOUT",
-      payload: null,
-    });
-    history.push("/login");
+    signOut(auth)
+      .then(() => {
+        dispatch({
+          type: "LOGOUT",
+          payload: null,
+        });
+        history.push("/login");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
     <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">
       <Item key="home" icon={<AppstoreOutlined />}>
-        <Link to="/">HOME</Link>
+        <Link to="/">Tech-Nexus</Link>
       </Item>
-
       <Item key="shop" icon={<ShoppingOutlined />}>
         <Link to="/shop">Shop</Link>
       </Item>
-
       <Item key="cart" icon={<ShoppingCartOutlined />}>
         <Link to="/cart">
           <Badge count={cart.length} offset={[9, 0]}>
-            cart
+            Cart
           </Badge>
         </Link>
       </Item>
 
-      {!user && (
-        <Item key="Register" icon={<UserAddOutlined />} className="float-end">
-          <Link to="/register">Register</Link>
-        </Item>
-      )}
-
-      {!user && (
-        <Item key="Login" icon={<UserOutlined />} className="float-end">
-          <Link to="/login">Login</Link>
-        </Item>
-      )}
-
+      <Item key="search" className="mt-2 ms-auto">
+        <Search />
+      </Item>
       {user && (
         <SubMenu
           key="SubMenu"
           icon={<SettingOutlined />}
           title={user.email && user.email.split("@")[0]}
-          className="float-end"
         >
-          {user.role === "subscriber" ? (
-            <Item>
+          {user && user.role === "subscriber" && (
+            <Item key="userDashboard">
               <Link to="/user/history">Dashboard</Link>
             </Item>
-          ) : (
-            <Item>
+          )}
+          {user && user.role === "admin" && (
+            <Item key="adminDashboard">
               <Link to="/admin/dashboard">Dashboard</Link>
             </Item>
           )}
-          <Item icon={<LogoutOutlined />} onClick={logout}>
+          <Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
             Logout
           </Item>
         </SubMenu>
       )}
 
-      <span key="search" className="float-end">
-        <Search />
-      </span>
+      {!user && (
+        <Item key="login" icon={<UserOutlined />}>
+          <Link to="/login">Login</Link>
+        </Item>
+      )}
+
+      {!user && (
+        <Item key="register" icon={<UserAddOutlined />}>
+          <Link to="/register">register</Link>
+        </Item>
+      )}
     </Menu>
   );
 };
