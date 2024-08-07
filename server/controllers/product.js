@@ -88,7 +88,7 @@ exports.list = async (req, res) => {
     //createdAt/updatedAt, desc/asc, 3
     const { sort, order, page } = req.body;
     const currentPage = page || 1;
-    const perPage = 4;
+    const perPage = 6;
 
     const products = await Product.find({})
     //skip that much amount of cards ... so lets suppose if user 

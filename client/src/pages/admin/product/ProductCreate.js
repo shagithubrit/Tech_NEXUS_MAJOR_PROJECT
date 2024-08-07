@@ -27,8 +27,8 @@ import { Spin } from "antd";
 // };
 
 const initialState = {
-  title: "MacBook Pro M1",
-  description: "Latest Apple Technology",
+  title: "",
+  description: "",
   price: 2000,
   categories: [],
   category: "",
