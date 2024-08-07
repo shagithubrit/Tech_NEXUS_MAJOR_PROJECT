@@ -23,7 +23,13 @@ mongoose
 //middleware
 app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "2mb" }));
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // allow request from any origin
+    methods: ["GET", "POST", "PUT", "DELETE"], // ALLOW THESE METHODS
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 //routes middleware
 readdirSync("./routes").map((r) => app.use("/api", require("./routes/" + r)));
